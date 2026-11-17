@@ -25,8 +25,24 @@ button{background:#1763b1;color:white;border:0;border-radius:8px;padding:14px;ma
 <div id="resultado"></div>
 <script>
 const estoque = JSON.parse(localStorage.getItem('prime_estoque') || '{}');
+  
+const produtos = JSON.parse(
+  localStorage.getItem('prime-wms-demo-produtos-v1') || '[]'
+);
+
+function identificarProduto(codigo) {
+  const busca = codigo.trim().toUpperCase();
+  const produto = produtos.find(p =>
+    p.interno === busca || p.ean === busca
+  );
+  return produto ? (produto.ean || produto.interno) : busca;
+}
+
 function movimentar(tipo) {
-  const codigo = document.getElementById('produto').value.trim();
+
+const codigo = identificarProduto(
+  document.getElementById('produto').value
+);
   const qtd = Number(document.getElementById('quantidade').value);
   if (!codigo || !Number.isInteger(qtd) || qtd <= 0) {
     alert('Informe produto e quantidade válida');
