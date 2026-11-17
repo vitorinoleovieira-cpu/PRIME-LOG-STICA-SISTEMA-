@@ -7,5 +7,38 @@
 <body>
 <h1>Controle de Estoque</h1>
 <p>WMS Prime Logística</p>
+  <h2>Movimentação de Estoque</h2>
+<input id="produto" placeholder="Código do produto">
+<input id="quantidade" type="number" min="1" placeholder="Quantidade">
+<button onclick="movimentar('entrada')">Entrada</button>
+<button onclick="movimentar('saida')">Saída</button>
+<h2>Saldo em Estoque</h2>
+<div id="resultado"></div>
+<script>
+const estoque = JSON.parse(localStorage.getItem('prime_estoque') || '{}');
+function movimentar(tipo) {
+  const codigo = document.getElementById('produto').value.trim();
+  const qtd = Number(document.getElementById('quantidade').value);
+  if (!codigo || !Number.isInteger(qtd) || qtd <= 0) {
+    alert('Informe produto e quantidade válida');
+    return;
+  }
+  const atual = estoque[codigo] || 0;
+  if (tipo === 'saida' && qtd > atual) {
+    alert('Estoque insuficiente');
+    return;
+  }
+  estoque[codigo] = atual + (tipo === 'entrada' ? qtd : -qtd);
+  localStorage.setItem('prime_estoque', JSON.stringify(estoque));
+  mostrar();
+}
+function mostrar() {
+  document.getElementById('resultado').innerHTML =
+    Object.entries(estoque).map(([codigo, qtd]) =>
+      '<p>' + codigo.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + ': ' + qtd + '</p>'
+    ).join('');
+}
+mostrar();
+</script>
 </body>
 </html>
