@@ -1,48 +1,29 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>WMS Prime Logística</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #edf2f7;
-  margin: 0;
-}
-header {
-  background: #123456;
-  color: white;
-  padding: 25px;
-  text-align: center;
-}
-main {
-  padding: 20px;
-}
-.card {
-  background: white;
-  padding: 22px;
-  margin: 12px 0;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px #ccc;
-}
-h2 { color: #123456; }
+:root{font-family:system-ui,Arial,sans-serif;color:#18324b;background:#eef3f7}*{box-sizing:border-box}body{margin:0}header{background:#123456;color:white;padding:20px}header h1{font-size:23px;margin:0}header p{margin:4px 0 0}main{max-width:980px;margin:auto;padding:18px}.panel{background:white;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 2px 10px #12345613}h2{margin-top:0;font-size:20px}label{display:block;font-weight:600;margin:12px 0 5px}input{width:100%;padding:12px;border:1px solid #aab7c3;border-radius:8px;font-size:16px}button{border:0;background:#17633d;color:white;border-radius:8px;padding:12px 18px;font-weight:700;font-size:15px;cursor:pointer}.secondary{background:#123456}.danger{background:#9b3030}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid #ddd;overflow-wrap:anywhere}th{background:#e9f0f5}.table-wrap{overflow-x:auto}.muted{color:#526476;font-size:14px}.status{min-height:22px;margin-top:10px}nav{display:flex;gap:8px;overflow:auto;margin-bottom:16px}nav a{background:white;padding:10px 14px;border-radius:8px;color:#123456;text-decoration:none;font-weight:600;white-space:nowrap}@media(max-width:600px){.grid{grid-template-columns:1fr}main{padding:12px}.panel{padding:15px}th,td{font-size:13px;padding:7px}}
 </style>
 </head>
 <body>
-<header>
-<h1>PRIME LOGÍSTICA</h1>
-<p>Sistema WMS</p>
-</header>
+<header><h1>PRIME LOGÍSTICA</h1><p>WMS • Cadastro e consulta de produtos</p></header>
 <main>
-<h2>Painel Operacional</h2>
-<div class="card">📥 Recebimento</div>
-<div class="card">📦 Estoque</div>
-<div class="card">📋 Inventário</div>
-<div class="card">🛒 Separação</div>
-<div class="card">🚚 Expedição</div>
-<div class="card">📊 Relatórios</div>
+<nav><a href="#cadastro">Cadastro</a><a href="#consulta">Consulta</a></nav>
+<section class="panel" id="cadastro"><h2>Cadastrar produto</h2><p class="muted">Versão de demonstração: os dados ficam neste navegador, não são compartilhados entre equipamentos.</p>
+<form id="form"><div class="grid"><div><label for="interno">Código interno *</label><input id="interno" required maxlength="40" placeholder="PRD000123"></div><div><label for="ean">EAN-13 (opcional)</label><input id="ean" inputmode="numeric" maxlength="13" placeholder="7891234567895"></div><div><label for="descricao">Descrição *</label><input id="descricao" required maxlength="120" placeholder="Arroz branco 5 kg"></div><div><label for="quantidade">Quantidade inicial *</label><input id="quantidade" type="number" min="0" step="1" required value="0"></div></div><div class="actions"><button type="submit">Salvar produto</button><button type="reset" class="secondary">Limpar campos</button></div></form><p class="status" id="status" role="status"></p></section>
+<section class="panel" id="consulta"><h2>Consultar produtos</h2><label for="busca">Pesquisar por código interno, EAN ou descrição</label><input id="busca" placeholder="Digite ou escaneie o código"><div class="table-wrap"><table><thead><tr><th>Interno</th><th>EAN-13</th><th>Descrição</th><th>Saldo</th><th>Ação</th></tr></thead><tbody id="lista"></tbody></table></div><p class="muted" id="total"></p></section>
 </main>
-</body>
-</html>
+<script>
+'use strict';
+const KEY='prime-wms-demo-produtos-v1';
+const el=id=>document.getElementById(id);
+let produtos=[];
+try{const raw=JSON.parse(localStorage.getItem(KEY)||'[]');produtos=Array.isArray(raw)?raw:[]}catch{produtos=[]}
+function validoEAN(s){if(!/^\d{13}$/.test(s))return false;const soma=[...s.slice(0,12)].reduce((n,d,i)=>n+Number(d)*(i%2?3:1),0);return (10-soma%10)%10===Number(s[12])}
+function persistir(){localStorage.setItem(KEY,JSON.stringify(produtos))}
+function render(){const q=el('busca').value.trim().toLowerCase();const lista=el('lista');lista.replaceChildren();const encontrados=produtos.filter(p=>[p.interno,p.ean,p.descricao].some(v=>v.toLowerCase().includes(q)));for(const p of encontrados){const tr=document.createElement('tr');for(const v of [p.interno,p.ean||'—',p.descricao,String(p.quantidade)]){const td=document.createElement('td');td.textContent=v;tr.append(td)}const td=document.createElement('td');const btn=document.createElement('button');btn.textContent='Excluir';btn.className='danger';btn.type='button';btn.addEventListener('click',()=>{if(confirm('Excluir este produto da demonstração?')){produtos=produtos.filter(x=>x.interno!==p.interno);persistir();render()}});td.append(btn);tr.append(td);lista.append(tr)}el('total').textContent=`${encontrados.length} produto(s) encontrado(s)`}
+el('form').addEventListener('submit',event=>{event.preventDefault();const interno=el('interno').value.trim().toUpperCase();const ean=el('ean').value.trim();const descricao=el('descricao').value.trim();const quantidade=Number(el('quantidade').value);const status=el('status');if(ean&&!validoEAN(ean)){status.textContent='EAN-13 inválido: confira os 13 dígitos e o dígito verificador.';return}if(!Number.isSafeInteger(quantidade)||quantidade<0){status.textContent='Quantidade deve ser um número inteiro não negativo.';return}if(produtos.some(p=>p.interno===interno)){status.textContent='Código interno já cadastrado.';return}if(ean&&produtos.some(p=>p.ean===ean)){status.textContent='EAN-13 já cadastrado.';return}produtos.push({interno,ean,descricao,quantidade});try{persistir()}catch{produtos.pop();status.textContent='Não foi possível salvar neste navegador.';return}el('form').reset();status.textContent='Produto cadastrado com sucesso neste navegador.';render()});el('busca').addEventListener('input',render);render();
+</script>
+</body></html>
