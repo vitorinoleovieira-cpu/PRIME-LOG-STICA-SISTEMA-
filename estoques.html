@@ -48,6 +48,48 @@ function mostrar() {
     ).join('');
 }
 mostrar();
+  
+const CHAVE_PRODUTOS = 'prime-wms-demo-produtos-v1';
+
+function integrarProdutos() {
+  let produtos = [];
+  try {
+    produtos = JSON.parse(
+      localStorage.getItem(CHAVE_PRODUTOS) || '[]'
+    );
+  } catch (erro) {
+    console.error('Erro ao carregar cadastro', erro);
+    return;
+  }
+
+  if (!Array.isArray(produtos)) return;
+  let alterado = false;
+
+  produtos.forEach(p => {
+    const codigo = String(p.interno || '').trim().toUpperCase();
+    const ean = String(p.ean || '').trim();
+    const chave = ean || codigo;
+    if (!chave) return;
+
+    const inicial = Number(p.quantidade);
+    if (
+      !Object.prototype.hasOwnProperty.call(estoque, chave) &&
+      Number.isSafeInteger(inicial) &&
+      inicial >= 0
+    ) {
+      estoque[chave] = inicial;
+      alterado = true;
+    }
+  });
+
+  if (alterado) {
+    localStorage.setItem('prime_estoque', JSON.stringify(estoque));
+  }
+  mostrar();
+}
+
+integrarProdutos();
+  
 </script>
 </body>
 </html>
