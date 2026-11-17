@@ -11,6 +11,9 @@
 <header><h1>PRIME LOGÍSTICA</h1><p>WMS • Cadastro e consulta de produtos</p></header>
 <main>
 <nav><a href="#cadastro">Cadastro</a><a href="#consulta">Consulta</a></nav>
+<nav>
+<a href="estoques.html">📦 Controle de Estoque</a>
+</nav>
 <section class="panel" id="cadastro"><h2>Cadastrar produto</h2><p class="muted">Versão de demonstração: os dados ficam neste navegador, não são compartilhados entre equipamentos.</p>
 <form id="form"><div class="grid"><div><label for="interno">Código interno *</label><input id="interno" required maxlength="40" placeholder="PRD000123"></div><div><label for="ean">EAN-13 (opcional)</label><input id="ean" inputmode="numeric" maxlength="13" placeholder="7891234567895"></div><div><label for="descricao">Descrição *</label><input id="descricao" required maxlength="120" placeholder="Arroz branco 5 kg"></div><div><label for="quantidade">Quantidade inicial *</label><input id="quantidade" type="number" min="0" step="1" required value="0"></div></div><div class="actions"><button type="submit">Salvar produto</button><button type="reset" class="secondary">Limpar campos</button></div></form><p class="status" id="status" role="status"></p></section>
 <section class="panel" id="consulta"><h2>Consultar produtos</h2><label for="busca">Pesquisar por código interno, EAN ou descrição</label><input id="busca" placeholder="Digite ou escaneie o código"><div class="table-wrap"><table><thead><tr><th>Interno</th><th>EAN-13</th><th>Descrição</th><th>Saldo</th><th>Ação</th></tr></thead><tbody id="lista"></tbody></table></div><p class="muted" id="total"></p></section>
